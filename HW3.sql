@@ -129,6 +129,56 @@ order by
     sum_list_price desc,
     count_list_price desc;
 
+--- сравнение
+
+---- вариант 1
+with q1 as (
+	select
+	    c.customer_id,
+	    c.first_name,
+	    c.last_name,
+	    sum(t.list_price) as total_sum,
+	    max(t.list_price) as max_price,
+	    min(t.list_price) as min_price,
+	    count(*) as cnt_transactions
+	from transaction_20240101 t
+	join customer_20240101 c
+	  on t.customer_id = c.customer_id
+	group by
+	    c.customer_id,
+	    c.first_name,
+	    c.last_name
+	order by
+	    total_sum desc,
+	    cnt_transactions desc
+),
+---- вариант 2
+q2 as (
+	select distinct
+	    c.customer_id,
+	    c.first_name,
+	    c.last_name,
+	    -- оконные функции:
+	    sum(t.list_price) over (partition by c.customer_id) as sum_list_price,
+	    max(t.list_price) over (partition by c.customer_id) as max_list_price,
+	    min(t.list_price) over (partition by c.customer_id) as min_list_price,
+	    count(t.list_price) over (partition by c.customer_id) as count_list_price
+	from transaction_20240101 t
+	join customer_20240101 c
+	  on t.customer_id = c.customer_id
+	order by
+	    sum_list_price desc,
+	    count_list_price desc
+)
+---- сравнение
+select * from q1
+except
+select * from q2
+union all
+select * from q2
+except
+select * from q1;
+
 
 -- найти имена и фамилии клиентов с минимальной/максимальной суммой транзакций за весь период (сумма транзакций не может быть null). напишите отдельные запросы для минимальной и максимальной суммы. — (2 балла)
 

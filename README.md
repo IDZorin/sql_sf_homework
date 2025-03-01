@@ -73,6 +73,15 @@
 
 </details>
 
+<details>
+  <summary>Сравнение через EXCEPT</summary>
+
+![alt text](images/image.png)
+
+</details>
+
+
+
 <br>
 
 ✅ 
